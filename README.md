@@ -6,7 +6,7 @@
 ---
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ec301b03-9de7-4efe-a27a-a648d8da3dd2" 
+  <img src="https://github.com/user-attachments/assets/3768a8d3-d12c-48f1-8014-a8f9d8b48b5f"
  width="90%">
 </p>
 
@@ -45,15 +45,19 @@ The project demonstrates the fundamentals of connecting a frontend interface wit
 
 ## 🔄 Status Toggle
 
-Each user record includes a **status** field that can be switched instantly between **Active** and **Inactive**.
+Each user record includes a **Status** field that can be switched instantly between **Active** and **Inactive**.
 
-### User Interface
+### Status Examples
 
-| Inactive | Active |
-|----------|--------|
-| ![Inactive Status](images/status-inactive.png) | ![Active Status](images/status-active.png) |
+<p align="center">
+<img src="https://github.com/user-attachments/assets/59c1ad5e-499e-4a41-90a3-b3d8060e6d21" width="85%">
+</p>
 
-The toggle button updates the record directly in the MySQL database and refreshes the interface immediately without reloading the page.
+The image above shows both possible status states:
+- **Active** – the user account is enabled.
+- **Inactive** – the user account is disabled.
+
+Toggling the status updates the record directly in the MySQL database and refreshes the interface immediately without reloading the page.
 
 ### Status Values
 
@@ -71,7 +75,8 @@ The application stores user information inside a MySQL database.
 ### Database Table
 
 <p align="center">
-  <img src="images/database-status.png" width="85%">
+  <img src="https://github.com/user-attachments/assets/298a7d03-64f0-43a0-9b11-9fe6a5f858b7" 
+ width="85%">
 </p>
 
 Example:
@@ -79,7 +84,7 @@ Example:
 | id | name | age | status |
 |---:|------|----:|-------:|
 | 1 | Meshal | 24 | 1 |
-| 2 | Ahmed | 30 | 0 |
+| 2 | Tariq | 25 | 0 |
 
 - `0` → Inactive
 - `1` → Active
@@ -110,7 +115,7 @@ Example:
 ### 1. Stamped Confirmation View (Frontend)
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/970e90b3-0770-4c38-a838-0da893a07f7d" 
+<img src="https://github.com/user-attachments/assets/2fecad39-cf07-4fcd-80c8-7841cef0e18f" 
  width="85%">
 </p>
 
@@ -119,18 +124,22 @@ Example:
 ### 2. Database Records & Live Counter (Backend)
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/b5170568-9824-4160-b2c4-c29ad1c3cc25" 
+<img src="https://github.com/user-attachments/assets/298a7d03-64f0-43a0-9b11-9fe6a5f858b7" 
  width="85%">
+  </p>
+  
 ---
 
 ## ⚙️ How It Works
 
-1. Enter a name and age.
-2. Click **Submit**.
-3. The data is sent to **save.php**.
-4. PHP stores the information inside the MySQL database.
-5. The record counter retrieves the current number of database records.
-6. The page updates the displayed record count automatically.
+1. The user enters a name and age through the registration form.
+2. The data is sent to the PHP backend using `save.php`.
+3. PHP stores the user information inside the MySQL database.
+4. The application retrieves stored records dynamically using `records.php`.
+5. The live counter gets the current number of registered users through `count.php`.
+6. The user status can be changed using the toggle button.
+7. The status update is handled by `toggle_status.php` and saved directly in the MySQL database.
+8. JavaScript (Fetch API) updates the interface instantly without refreshing the page.
 
 ---
 
@@ -143,8 +152,6 @@ Example:
 - MySQL
 - InfinityFree Hosting
 - phpMyAdmin
-  
-  ---
 
 ## 📚 References
 

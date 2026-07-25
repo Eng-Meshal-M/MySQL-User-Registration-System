@@ -1,7 +1,7 @@
 # 🗄️ MySQL User Registration System
 
 > **Developed by:** Meshal Al Mehmady  
-> **Live Website:** https://meshalportfolio.42web.io/mysql_project/
+> **Live Website:** https://meshalportfolio.42web.io/registry-app/
 
 ---
 

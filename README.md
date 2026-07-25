@@ -62,9 +62,9 @@ During development, several enhancements were implemented beyond the basic requi
 ```text
 .
 ├── README.md             # Project documentation
-├── database.sql          # MySQL database schema & initial data
+├── user_form.sql          # MySQL database schema & initial data
 │
-└── mysql_project/        # Main web application files
+└── registry-app/        # Main web application files
     ├── index.html        # Main registration interface
     ├── db.php            # Database connection configuration
     ├── save.php          # Endpoint for inserting new entries

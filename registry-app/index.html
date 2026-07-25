@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل القيد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-deep:#12213B;
+    --ink-deep-2:#0D1930;
+    --paper:#EDE7D3;
+    --paper-2:#E4DCC2;
+    --ink-text:#1F2A24;
+    --ink-muted:#6B6350;
+    --brass:#B98B3E;
+    --brass-soft:#D8B876;
+    --oxblood:#7A2E27;
+    --line:#C9BFA0;
+    --error:#8C3B2E;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(185,139,62,0.08), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(185,139,62,0.06), transparent 40%),
+      var(--ink-deep);
+    background-color: var(--ink-deep);
+    font-family:'Tajawal', sans-serif;
+    color:var(--ink-text);
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* faint ledger grid on the dark desk background */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(185,139,62,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(185,139,62,0.05) 1px, transparent 1px);
+    background-size:36px 36px;
+    pointer-events:none;
+    mask-image: radial-gradient(circle at 50% 40%, black, transparent 75%);
+  }
+
+  /* floating ink-dust motes drifting across the desk */
+  .motes{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+
+  .mote{
+    position:absolute;
+    border-radius:50%;
+    background: radial-gradient(circle, var(--brass-soft), transparent 70%);
+    opacity:.5;
+    animation: drift linear infinite;
+  }
+
+  @keyframes drift{
+    0%   { transform: translateY(0) translateX(0); opacity:0; }
+    12%  { opacity:.6; }
+    88%  { opacity:.4; }
+    100% { transform: translateY(-90vh) translateX(30px); opacity:0; }
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    max-width:600px;
+  }
+
+  /* ornamental brass corner brackets framing the card */
+  .corner{
+    position:absolute;
+    width:34px;
+    height:34px;
+    z-index:2;
+    opacity:.85;
+  }
+  .corner svg{ width:100%; height:100%; display:block; }
+  .corner.tl{ top:-14px; left:-14px; }
+  .corner.tr{ top:-14px; right:-14px; transform:scaleX(-1); }
+  .corner.bl{ bottom:-14px; left:-14px; transform:scaleY(-1); }
+  .corner.br{ bottom:-14px; right:-14px; transform:scale(-1,-1); }
+
+  .card{
+    position:relative;
+    background:
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    border-radius:6px;
+    padding:56px 52px 46px;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,0.4) inset,
+      0 30px 70px -20px rgba(0,0,0,0.65),
+      0 8px 24px -6px rgba(0,0,0,0.5);
+    transform: rotate(-0.6deg);
+    transition: transform .4s ease;
+  }
+
+  .card::before{
+    /* stitched / bound edge on the right, like a ledger spine */
+    content:"";
+    position:absolute;
+    top:14px; bottom:14px; right:10px;
+    width:1px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--brass) 0 6px,
+      transparent 6px 12px
+    );
+    opacity:.55;
+  }
+
+  /* light embroidered flourish sitting on the navy background corners */
+  .bg-embroidery{
+    position:fixed;
+    width:170px;
+    height:170px;
+    pointer-events:none;
+    opacity:.24;
+    z-index:0;
+  }
+  .bg-embroidery svg{ width:100%; height:100%; display:block; }
+  .bg-embroidery.tl{ top:0; left:0; }
+  .bg-embroidery.tr{ top:0; right:0; transform:scaleX(-1); }
+  .bg-embroidery.bl{ bottom:0; left:0; transform:scaleY(-1); }
+  .bg-embroidery.br{ bottom:0; right:0; transform:scale(-1,-1); }
+
+  @media (max-width:700px){
+    .bg-embroidery{ width:110px; height:110px; opacity:.16; }
+  }
+
+  .eyebrow-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.12em;
+    color:var(--ink-muted);
+  }
+
+  .entry-no{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--brass);
+    letter-spacing:.05em;
+  }
+
+  .rule{
+    height:1px;
+    background: linear-gradient(90deg, var(--line), transparent 85%);
+    margin:10px 0 22px;
+  }
+
+  h1{
+    font-family:'Aref Ruqaa', serif;
+    font-weight:700;
+    font-size:36px;
+    margin:0 0 6px;
+    color:var(--ink-deep);
+  }
+
+  .sub{
+    font-size:14px;
+    color:var(--ink-muted);
+    margin:0 0 32px;
+    line-height:1.7;
+  }
+
+  .field{
+    position:relative;
+    margin-bottom:30px;
+  }
+
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-muted);
+    margin-bottom:9px;
+  }
+
+  .field input{
+    width:100%;
+    border:none;
+    border-bottom:1.5px solid var(--line);
+    background:transparent;
+    font-family:'Tajawal', sans-serif;
+    font-size:20px;
+    color:var(--ink-text);
+    padding:6px 2px 10px;
+    outline:none;
+    transition: border-color .25s ease;
+  }
+
+  .field input::placeholder{
+    color:#a89f86;
+    font-weight:300;
+  }
+
+  .field input:focus{
+    border-bottom-color:var(--brass);
+  }
+
+  .field.has-error input{
+    border-bottom-color:var(--error);
+  }
+
+  .field-msg{
+    font-size:11.5px;
+    color:var(--error);
+    margin-top:6px;
+    min-height:14px;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+
+  .field.has-error .field-msg{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:34px;
+  }
+
+  .status-line{
+    font-size:12px;
+    color:var(--ink-muted);
+    min-height:16px;
+  }
+
+  .status-line.err{ color:var(--error); }
+
+  button.stamp-btn{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    font-family:'Tajawal', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--paper);
+    background:var(--ink-deep);
+    border:1.5px solid var(--brass);
+    border-radius:16px;
+    padding:13px 32px 11px;
+    cursor:pointer;
+    letter-spacing:.02em;
+    transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+    box-shadow: 0 6px 14px -6px rgba(0,0,0,.5);
+  }
+
+  button.stamp-btn .btn-main{
+    display:flex;
+    align-items:center;
+  }
+
+  button.stamp-btn .btn-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    font-weight:400;
+    letter-spacing:.32em;
+    color:var(--brass-soft);
+    text-transform:uppercase;
+  }
+
+  button.stamp-btn:hover{
+    background:var(--ink-deep-2);
+    box-shadow: 0 8px 18px -6px rgba(0,0,0,.55);
+  }
+
+  button.stamp-btn:active{
+    transform: translateY(2px) scale(.98);
+    box-shadow: 0 3px 8px -4px rgba(0,0,0,.5);
+  }
+
+  button.stamp-btn:disabled{
+    opacity:.6;
+    cursor:default;
+  }
+
+  button.stamp-btn .spinner{
+    display:inline-block;
+    width:13px;height:13px;
+    border-radius:50%;
+    border:2px solid rgba(237,231,211,.35);
+    border-top-color:var(--paper);
+    animation:spin .7s linear infinite;
+    vertical-align:-2px;
+    margin-inline-start:8px;
+  }
+
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ---- success stamp overlay ---- */
+  .stamp-layer{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    opacity:0;
+  }
+
+  .seal{
+    --seal-color: var(--oxblood);
+    width:190px;
+    height:190px;
+    transform: scale(.4) rotate(-18deg);
+    opacity:0;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,.25));
+  }
+
+  .seal svg{ width:100%; height:100%; display:block; }
+
+  .card.stamped .stamp-layer{
+    opacity:1;
+    transition: opacity .05s;
+  }
+
+  .card.stamped .seal{
+    animation: stampDown .5s cubic-bezier(.2,1.5,.4,1) forwards;
+  }
+
+  @keyframes stampDown{
+    0%{ transform:scale(2.2) rotate(-18deg); opacity:0; }
+    55%{ transform:scale(.92) rotate(-12deg); opacity:1; }
+    75%{ transform:scale(1.04) rotate(-12deg); }
+    100%{ transform:scale(1) rotate(-12deg); opacity:1; }
+  }
+
+  .card.stamped .form-body{
+    filter: blur(1.5px) saturate(.7);
+    opacity:.35;
+    transition: all .3s ease;
+    pointer-events:none;
+  }
+
+  .result-note{
+    position:absolute;
+    bottom:26px;
+    right:36px;
+    left:36px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-muted);
+    opacity:0;
+  }
+
+  .card.stamped .result-note{
+    opacity:1;
+    transition: opacity .5s ease .35s;
+  }
+
+  .reset-link{
+    background:none;
+    border:none;
+    color:var(--brass);
+    font-family:'Tajawal', sans-serif;
+    font-size:12.5px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card.stamped .seal{ animation:none; opacity:1; transform:scale(1) rotate(-12deg); }
+    button.stamp-btn, .card{ transition:none; }
+  }
+
+  @media (max-width:480px){
+    .card{ padding:32px 22px 28px; }
+    h1{ font-size:28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="motes" id="motes"></div>
+
+<div class="bg-embroidery tl">
+  <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#B98B3E" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="0" cy="0" r="3" fill="#B98B3E" stroke="none"/>
+      <path d="M0 42 Q32 10 62 28 Q80 38 68 56 Q58 74 84 80 Q106 85 100 62"/>
+      <path d="M42 0 Q12 26 24 56 Q30 76 56 66"/>
+      <ellipse cx="62" cy="28" rx="6" ry="3" transform="rotate(28 62 28)"/>
+      <ellipse cx="84" cy="80" rx="6" ry="3" transform="rotate(-18 84 80)"/>
+      <ellipse cx="24" cy="56" rx="5" ry="2.5" transform="rotate(58 24 56)"/>
+      <path d="M17 17 L21 21 M21 17 L17 21"/>
+      <path d="M46 46 L50 50 M50 46 L46 50"/>
+    </g>
+  </svg>
+</div>
+<div class="bg-embroidery tr">
+  <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#B98B3E" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="0" cy="0" r="3" fill="#B98B3E" stroke="none"/>
+      <path d="M0 42 Q32 10 62 28 Q80 38 68 56 Q58 74 84 80 Q106 85 100 62"/>
+      <path d="M42 0 Q12 26 24 56 Q30 76 56 66"/>
+      <ellipse cx="62" cy="28" rx="6" ry="3" transform="rotate(28 62 28)"/>
+      <ellipse cx="84" cy="80" rx="6" ry="3" transform="rotate(-18 84 80)"/>
+      <ellipse cx="24" cy="56" rx="5" ry="2.5" transform="rotate(58 24 56)"/>
+      <path d="M17 17 L21 21 M21 17 L17 21"/>
+      <path d="M46 46 L50 50 M50 46 L46 50"/>
+    </g>
+  </svg>
+</div>
+<div class="bg-embroidery bl">
+  <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#B98B3E" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="0" cy="0" r="3" fill="#B98B3E" stroke="none"/>
+      <path d="M0 42 Q32 10 62 28 Q80 38 68 56 Q58 74 84 80 Q106 85 100 62"/>
+      <path d="M42 0 Q12 26 24 56 Q30 76 56 66"/>
+      <ellipse cx="62" cy="28" rx="6" ry="3" transform="rotate(28 62 28)"/>
+      <ellipse cx="84" cy="80" rx="6" ry="3" transform="rotate(-18 84 80)"/>
+      <ellipse cx="24" cy="56" rx="5" ry="2.5" transform="rotate(58 24 56)"/>
+      <path d="M17 17 L21 21 M21 17 L17 21"/>
+      <path d="M46 46 L50 50 M50 46 L46 50"/>
+    </g>
+  </svg>
+</div>
+<div class="bg-embroidery br">
+  <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#B98B3E" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="0" cy="0" r="3" fill="#B98B3E" stroke="none"/>
+      <path d="M0 42 Q32 10 62 28 Q80 38 68 56 Q58 74 84 80 Q106 85 100 62"/>
+      <path d="M42 0 Q12 26 24 56 Q30 76 56 66"/>
+      <ellipse cx="62" cy="28" rx="6" ry="3" transform="rotate(28 62 28)"/>
+      <ellipse cx="84" cy="80" rx="6" ry="3" transform="rotate(-18 84 80)"/>
+      <ellipse cx="24" cy="56" rx="5" ry="2.5" transform="rotate(58 24 56)"/>
+      <path d="M17 17 L21 21 M21 17 L17 21"/>
+      <path d="M46 46 L50 50 M50 46 L46 50"/>
+    </g>
+  </svg>
+</div>
+
+<div class="stage">
+  <div class="corner tl"><svg viewBox="0 0 34 34"><path d="M2 34 L2 10 Q2 2 10 2 L34 2" fill="none" stroke="#B98B3E" stroke-width="2"/><circle cx="2" cy="2" r="2.5" fill="#B98B3E"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 34 34"><path d="M2 34 L2 10 Q2 2 10 2 L34 2" fill="none" stroke="#B98B3E" stroke-width="2"/><circle cx="2" cy="2" r="2.5" fill="#B98B3E"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 34 34"><path d="M2 34 L2 10 Q2 2 10 2 L34 2" fill="none" stroke="#B98B3E" stroke-width="2"/><circle cx="2" cy="2" r="2.5" fill="#B98B3E"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 34 34"><path d="M2 34 L2 10 Q2 2 10 2 L34 2" fill="none" stroke="#B98B3E" stroke-width="2"/><circle cx="2" cy="2" r="2.5" fill="#B98B3E"/></svg></div>
+
+  <div class="card" id="card">
+
+    <div class="form-body" id="formBody">
+      <div class="eyebrow-row">
+        <span class="eyebrow">سجل القيود</span>
+        <span class="entry-no" id="entryNo">قيد ٠٠٠١</span>
+      </div>
+      <div class="rule"></div>
+
+      <h1>قيد جديد</h1>
+      <p class="sub">أدخل الاسم والعمر لتسجيلهما في السجل.</p>
+
+      <form id="registryForm" novalidate>
+        <div class="field" id="nameField">
+          <label for="fullName">الاسم</label>
+          <input type="text" id="fullName" name="fullName" placeholder="اكتب اسمك هنا بالإنجليزي" autocomplete="off">
+          <div class="field-msg">الاسم مطلوب، ويُكتب بالأحرف الإنجليزية فقط</div>
+        </div>
+
+        <div class="field" id="ageField">
+          <label for="age">العمر</label>
+          <input type="number" id="age" name="age" placeholder="اكتب العمر هنا" min="1" max="120" autocomplete="off">
+          <div class="field-msg">أدخل عمرًا صحيحًا بين ١ و١٢٠</div>
+        </div>
+
+        <div class="actions">
+          <span class="status-line" id="statusLine"></span>
+          <button type="submit" class="stamp-btn" id="submitBtn">
+            <span class="btn-main"><span id="btnLabel">تسجيل القيد</span></span>
+            <span class="btn-sub">Submit</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ink-stamp success overlay -->
+    <div class="stamp-layer" id="stampLayer">
+      <div class="seal">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <filter id="inkRough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/>
+          </filter>
+          <g filter="url(#inkRough)" fill="none" stroke="var(--seal-color)">
+            <circle cx="100" cy="100" r="86" stroke-width="4"/>
+            <circle cx="100" cy="100" r="74" stroke-width="1.5"/>
+            <path id="seal-arc-top" fill="none"
+                  d="M 32 100 A 68 68 0 0 1 168 100" />
+            <text font-family="'Aref Ruqaa', serif" font-size="20" fill="var(--seal-color)" stroke="none">
+              <textPath href="#seal-arc-top" startOffset="50%" text-anchor="middle">تم القيد بنجاح</textPath>
+            </text>
+            <text x="100" y="112" font-family="'Aref Ruqaa', serif" font-weight="700" font-size="30"
+                  fill="var(--seal-color)" stroke="none" text-anchor="middle">محفوظ</text>
+            <text x="100" y="150" font-family="'IBM Plex Mono', monospace" font-size="11"
+                  fill="var(--seal-color)" stroke="none" text-anchor="middle" id="sealDate">--</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="result-note" id="resultNote">
+      <button class="reset-link" id="resetBtn">تسجيل قيد آخر</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const form        = document.getElementById('registryForm');
+  const card        = document.getElementById('card');
+  const nameField    = document.getElementById('nameField');
+  const ageField     = document.getElementById('ageField');
+  const nameInput    = document.getElementById('fullName');
+  const ageInput     = document.getElementById('age');
+  const submitBtn    = document.getElementById('submitBtn');
+  const btnLabel     = document.getElementById('btnLabel');
+  const statusLine   = document.getElementById('statusLine');
+  const entryNoEl    = document.getElementById('entryNo');
+  const sealDateEl   = document.getElementById('sealDate');
+  const resetBtn     = document.getElementById('resetBtn');
+
+  // رقم القيد الحقيقي — يُقرأ من قاعدة البيانات (count.php)
+  // مو عدّاد وهمي، فلو حذفت صف من SQL بيرجع الرقم يعكس ذلك تلقائيًا
+  let entryCount = 0;
+
+  function renderEntryNo(){
+    const n = String(entryCount + 1).padStart(4, '٠').replace(/[0-9]/g, d =>
+      '٠١٢٣٤٥٦٧٨٩'[d]
+    );
+    entryNoEl.textContent = 'قيد ' + n;
+  }
+
+  async function refreshEntryCount(){
+    try {
+      // ============================================================
+      //  يطلب من count.php عدد الصفوف الحالي فعليًا في قاعدة البيانات
+      // ============================================================
+      const res  = await fetch('count.php');
+      const data = await res.json();
+      if (data && data.success){
+        entryCount = data.count;
+      }
+    } catch(err){
+      // لو ما قدر يتصل بالسيرفر، يفضل الرقم كما هو بدل ما يوقف الصفحة
+    }
+    renderEntryNo();
+  }
+
+  refreshEntryCount();
+
+  // ambient floating motes on the desk background
+  (function spawnMotes(){
+    const layer = document.getElementById('motes');
+    const count = 20;
+    for(let i = 0; i < count; i++){
+      const m = document.createElement('span');
+      m.className = 'mote';
+      const size = 3 + Math.random() * 5;
+      m.style.width = size + 'px';
+      m.style.height = size + 'px';
+      m.style.left = Math.random() * 100 + 'vw';
+      m.style.bottom = (-10 - Math.random() * 20) + 'px';
+      m.style.animationDuration = (14 + Math.random() * 16) + 's';
+      m.style.animationDelay = (Math.random() * 18) + 's';
+      layer.appendChild(m);
+    }
+  })();
+
+  const ENGLISH_NAME_RE = /^[A-Za-z][A-Za-z\s'.-]*$/;
+
+  function setFieldError(fieldEl, hasError){
+    fieldEl.classList.toggle('has-error', hasError);
+  }
+
+  function validate(){
+    let ok = true;
+    const nameVal = nameInput.value.trim();
+    const ageVal  = ageInput.value.trim();
+
+    if(!nameVal || !ENGLISH_NAME_RE.test(nameVal)){
+      setFieldError(nameField, true);
+      ok = false;
+    } else {
+      setFieldError(nameField, false);
+    }
+
+    const ageNum = Number(ageVal);
+    if(!ageVal || isNaN(ageNum) || ageNum < 1 || ageNum > 120){
+      setFieldError(ageField, true);
+      ok = false;
+    } else {
+      setFieldError(ageField, false);
+    }
+
+    return ok;
+  }
+
+  function setLoading(isLoading){
+    submitBtn.disabled = isLoading;
+    btnLabel.textContent = isLoading ? 'جارٍ الحفظ' : 'تسجيل القيد';
+    if(isLoading){
+      btnLabel.insertAdjacentHTML('afterend', '<span class="spinner"></span>');
+    } else {
+      const sp = submitBtn.querySelector('.spinner');
+      if(sp) sp.remove();
+    }
+  }
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    statusLine.textContent = '';
+    statusLine.classList.remove('err');
+
+    if(!validate()) return;
+
+    setLoading(true);
+
+    const payload = {
+      name: nameInput.value.trim(),
+      age: Number(ageInput.value.trim())
+    };
+
+    try {
+      // ============================================================
+      //  هنا يتم إرسال البيانات لملف الخادم (save.php) اللي يتصل
+      //  بقاعدة بيانات MySQL. عدّل المسار أدناه إذا غيّرت اسم الملف
+      //  أو مكانه على السيرفر.
+      // ============================================================
+      const res = await fetch('save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if(!res.ok) throw new Error('server-error');
+
+      const data = await res.json().catch(() => ({}));
+      if(data && data.success === false) throw new Error(data.message || 'save-failed');
+
+      // نجاح: نطبع الختم، ونحدّث رقم القيد من قاعدة البيانات فعليًا
+      await refreshEntryCount();
+
+      const now = new Date();
+      sealDateEl.textContent = now.toLocaleDateString('ar-EG') ;
+      card.classList.add('stamped');
+
+    } catch(err){
+      statusLine.textContent = 'تعذر حفظ القيد، تحقق من الاتصال بالخادم وحاول مرة أخرى';
+      statusLine.classList.add('err');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  resetBtn.addEventListener('click', function(){
+    card.classList.remove('stamped');
+    form.reset();
+    setFieldError(nameField, false);
+    setFieldError(ageField, false);
+    statusLine.textContent = '';
+    refreshEntryCount();
+    nameInput.focus();
+  });
+
+})();
+</script>
+
+</body>
+</html>

@@ -22,38 +22,69 @@ The project demonstrates the fundamentals of connecting a frontend interface wit
 
 ## ✨ Features
 
-- User registration form (Name & Age)
-- Store submitted data in a MySQL database
-- Real-time communication between HTML and PHP
-- Dynamic record counter linked directly to the database
-- Automatic record count update after every submission
-- Responsive and modern user interface
-- Database connection centralized in a dedicated PHP file
-- Clean project structure for easier maintenance
+- Register users with name and age
+- Store user data in a MySQL database
+- Display records dynamically without page refresh
+- Live database record counter
+- Toggle user status (Active / Inactive)
+- Instant UI updates using JavaScript (Fetch API)
+- Responsive and clean interface
+- Centralized database configuration (`db.php`)
 
 ---
 
 ## 🚀 Improvements
 
-During development, several enhancements were implemented beyond the basic requirements:
-
-- Replaced the local browser counter with a **real SQL record counter**.
-- The registration number is now calculated using the actual number of rows stored in the database.
-- The counter updates automatically whenever a new record is added.
-- If records are deleted directly from the database, the displayed count remains accurate after reopening the page.
-- Database connection settings were separated into a dedicated **db.php** file to avoid duplicated configuration.
+- Replaced the local counter with a live SQL record counter.
+- Added dynamic record retrieval.
+- Implemented a status toggle system with instant database updates.
+- Separated database configuration into `db.php`.
+- Improved project organization and maintainability.
 
 ---
 
-## 🛠️ Technologies Used
+## 🔄 Status Toggle
 
-- HTML5
-- CSS3
-- JavaScript (Fetch API)
-- PHP
-- MySQL
-- InfinityFree Hosting
-- phpMyAdmin
+Each user record includes a **status** field that can be switched instantly between **Active** and **Inactive**.
+
+### User Interface
+
+| Inactive | Active |
+|----------|--------|
+| ![Inactive Status](images/status-inactive.png) | ![Active Status](images/status-active.png) |
+
+The toggle button updates the record directly in the MySQL database and refreshes the interface immediately without reloading the page.
+
+### Status Values
+
+| Database Value | Display |
+|---------------:|---------|
+| `0` | 🔴 Inactive |
+| `1` | 🟢 Active |
+
+---
+
+## 🗄️ MySQL Database
+
+The application stores user information inside a MySQL database.
+
+### Database Table
+
+<p align="center">
+  <img src="images/database-status.png" width="85%">
+</p>
+
+Example:
+
+| id | name | age | status |
+|---:|------|----:|-------:|
+| 1 | Meshal | 24 | 1 |
+| 2 | Ahmed | 30 | 0 |
+
+- `0` → Inactive
+- `1` → Active
+
+> Database credentials are excluded from this repository for security reasons.
 
 ---
 
@@ -62,13 +93,15 @@ During development, several enhancements were implemented beyond the basic requi
 ```text
 .
 ├── README.md             # Project documentation
-├── user_form.sql          # MySQL database schema & initial data
+├── user_form.sql         # MySQL database schema & initial data
 │
-└── registry-app/        # Main web application files
+└── registry-app/         
     ├── index.html        # Main registration interface
     ├── db.php            # Database connection configuration
     ├── save.php          # Endpoint for inserting new entries
-    └── count.php         # Endpoint for retrieving active record count
+    ├── count.php         # Endpoint for retrieving database record count
+    ├── records.php       # Endpoint for retrieving all records
+    └── toggle_status.php # Endpoint for updating record status
 ```
 ---
 
@@ -100,6 +133,18 @@ During development, several enhancements were implemented beyond the basic requi
 6. The page updates the displayed record count automatically.
 
 ---
+
+## 🛠️ Technologies Used
+
+- HTML5
+- CSS3
+- JavaScript (Fetch API)
+- PHP
+- MySQL
+- InfinityFree Hosting
+- phpMyAdmin
+  
+  ---
 
 ## 📚 References
 
